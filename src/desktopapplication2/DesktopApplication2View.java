@@ -669,6 +669,25 @@ public class DesktopApplication2View extends FrameView {
         return tmpdate;
     }
 
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!    
+//    11111111111=============================================
+//select count(patient_id) as patient_by_day, reg_date as my_date from "PUBLIC".EVENT group by reg_date order by reg_date
+//показує кількість пацієнтів, зареєстрованих кожного дня
+//222222222===========================================!!!!!!!!!!!!!!!!!!!!!!!!!!1
+//select count (distinct patient_id) as patient_by_day, cast (visit_date as date) my_date from "PUBLIC".EVENT, "PUBLIC".VISIT 
+//where (VISIT.EVENT_ID=EVENT.ID) and (reg_date<>my_date) group by my_date
+//показує кількість візитів пацієнтів по днях, що відрізняються від дня їх реєстрації
+//333333333================================================================
+//select count(patient_id) as patient_by_day, reg_date as my_date from "PUBLIC".EVENT group by reg_date order by reg_date
+//union all select count (distinct patient_id) as patient_by_day, cast (visit_date as date) my_date from "PUBLIC".EVENT, "PUBLIC".VISIT 
+//where (VISIT.EVENT_ID=EVENT.ID) and (reg_date<>my_date) group by my_date
+//працює
+//4444====================================
+//select sum (patient_by_day)as sum_patient_by_day, my_date from (select count(patient_id) as patient_by_day, reg_date as my_date from "PUBLIC".EVENT group by my_date 
+//union all select count (distinct patient_id) as patient_by_day, cast (visit_date as date) as my_date from "PUBLIC".EVENT, "PUBLIC".VISIT 
+//where (VISIT.EVENT_ID=EVENT.ID) and (reg_date<>my_date) group by my_date) group by my_date order by my_date
+//працює - це сумування результатів запиту 1 та запиту 2 для дат, що співпадають на базі набору даних з запиту 3
+    
     //stat02:HSQL get list of vizits with patient counts
     public ResultSet gethsqlpatcountperdayrs(Connection tmpconn, Date tmplastsubdate) throws SQLException {
         ResultSet rs = null;
@@ -676,9 +695,26 @@ public class DesktopApplication2View extends FrameView {
         Statement tmpst = tmpconn.createStatement();
         try {//get data from from HSQL
             if (tmplastsubdate != null) {//not a first time statistic - get only last records
-                qrstr = "select count(patient_id) as patient_by_day, reg_date from \"PUBLIC\".EVENT where reg_date>='" + tmplastsubdate.toString() + "' group by reg_date order by reg_date";
+             //   qrstr = "select count(patient_id) as patient_by_day, reg_date from \"PUBLIC\".EVENT where reg_date>='" + tmplastsubdate.toString() + "' group by reg_date order by reg_date";
+                qrstr = "select sum (patient_by_day) as sum_patient_by_day, vizit_date"+
+                        " from (select count(patient_id) as patient_by_day, reg_date as vizit_date"+
+                        " from \"PUBLIC\".EVENT group by vizit_date"+                
+                        " union all"+
+                        " select count (distinct patient_id) as patient_by_day, cast (visit_date as date) as vizit_date"+
+                        " from \"PUBLIC\".EVENT, \"PUBLIC\".VISIT"+ 
+                        " where (VISIT.EVENT_ID=EVENT.ID) and (reg_date<>vizit_date)"+
+                        " group by vizit_date) where vizit_date>='" + tmplastsubdate.toString() + 
+                        "' group by vizit_date order by vizit_date";
             } else {//first time statistic - get all records
-                qrstr = "select count(patient_id) as patient_by_day, reg_date from \"PUBLIC\".EVENT group by reg_date order by reg_date";
+             //    qrstr = "select count(patient_id) as patient_by_day, reg_date from \"PUBLIC\".EVENT group by reg_date order by reg_date";
+                qrstr = "select sum (patient_by_day) as sum_patient_by_day, vizit_date"+
+                        " from (select count(patient_id) as patient_by_day, reg_date as vizit_date"+
+                        " from \"PUBLIC\".EVENT group by vizit_date"+                
+                        " union all"+
+                        " select count (distinct patient_id) as patient_by_day, cast (visit_date as date) as vizit_date"+
+                        " from \"PUBLIC\".EVENT, \"PUBLIC\".VISIT"+ 
+                        " where (VISIT.EVENT_ID=EVENT.ID) and (reg_date<>vizit_date)"+
+                        " group by vizit_date) group by vizit_date order by vizit_date";
             }
             tmpst.executeQuery(qrstr);    // run the query
             rs = tmpst.getResultSet();
@@ -704,8 +740,8 @@ public class DesktopApplication2View extends FrameView {
         try {
             int pgbariterate = 0;
             while (jmedrs.next()) {
-                tmppatientcount = jmedrs.getInt("patient_by_day");
-                tmpdate = jmedrs.getDate("reg_date");                
+                tmppatientcount = jmedrs.getInt("sum_patient_by_day");
+                tmpdate = jmedrs.getDate("vizit_date");                
                 if ((tmplastsubdate != null) && (count == 0)) {//update must be doned only for the first record
                     qrstr = "UPDATE statdetail SET patient_count=" + Integer.toString(tmppatientcount)
                             + " WHERE (office_id=" + Integer.toString(tmpofficeid)
@@ -856,7 +892,7 @@ public class DesktopApplication2View extends FrameView {
 //    private String hsqldb_file_name_prefix = "file:d:\\jMedReg_test\\data\\med_work";
     private String hsqldb_file_name_prefix = "file:..\\data\\med_work";
     private Connection hsqlconn;
- //   private String mysqldb_url = "jdbc:mysql://192.168.5.1:3306/jmedregstat";//VPN server!
+ //   private String mysqldb_url = "jdbc:mysql://192.168.1.2:3306/jmedregstat";//local server!
     private String mysqldb_url = "jdbc:mysql://192.168.5.1:3306/jmedregstat?useUnicode=true&characterEncoding=UTF8";//VPN server!
     private Connection mysqlconn;
     private String mysqluserName = "statadmin";

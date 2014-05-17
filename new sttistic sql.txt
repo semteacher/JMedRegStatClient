@@ -1,0 +1,13 @@
+select patient_id, icd10_name, reg_date, service_id, visit_date from "PUBLIC".EVENT, "PUBLIC".VISIT where VISIT.EVENT_ID=EVENT.ID
+
+
+select * from "PUBLIC".EVENT, "PUBLIC".VISIT where VISIT.EVENT_ID=EVENT.ID order by patient_id
+
+
+
+
+
+select count(patient_id) as patient_by_day, reg_date, visit_date from "PUBLIC".EVENT LEFT JOIN "PUBLIC".VISIT ON EVENT.ID=VISIT.EVENT_ID group by reg_date, visit_date order by reg_date
+
+
+

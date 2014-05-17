@@ -1,0 +1,9 @@
+jdbc:hsqldb:file:d:\jMedReg_test\data\med_work
+=============================================
+jdbc:hsqldb:file:d:\JMedReg-uvusla\data\med_work
+jdbc:hsqldb:file:d:\jMedReg-zarubunci-2011\data\med_work
+jdbc:hsqldb:file:d:\jMedReg_gnulivci-duplic\data\med_work
+jdbc:hsqldb:file:d:\jMedReg_govuliv\data\med_work
+jdbc:hsqldb:file:d:\jMedReg_kokoshunci\data\med_work
+
+

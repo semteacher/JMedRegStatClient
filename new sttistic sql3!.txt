@@ -1,0 +1,30 @@
+11111111111=============================================
+select count(patient_id) as patient_by_day, reg_date as my_date from "PUBLIC".EVENT group by reg_date order by reg_date
+
+показує кількість пацієнтів, зареєстрованих кожного дня
+
+
+
+222222222===========================================!!!!!!!!!!!!!!!!!!!!!!!!!!1
+select count (distinct patient_id) as patient_by_day, cast (visit_date as date) my_date from "PUBLIC".EVENT, "PUBLIC".VISIT 
+where (VISIT.EVENT_ID=EVENT.ID) and (reg_date<>my_date) group by my_date
+
+показує кількість візитів пацієнтів по днях, що відрізняються від дня їх реєстрації
+
+
+
+333333333================================================================
+select count(patient_id) as patient_by_day, reg_date as my_date from "PUBLIC".EVENT group by reg_date order by reg_date
+union all select count (distinct patient_id) as patient_by_day, cast (visit_date as date) my_date from "PUBLIC".EVENT, "PUBLIC".VISIT 
+where (VISIT.EVENT_ID=EVENT.ID) and (reg_date<>my_date) group by my_date
+
+працює
+
+
+
+4444====================================
+select sum (patient_by_day), my_date from (select count(patient_id) as patient_by_day, reg_date as my_date from "PUBLIC".EVENT group by my_date 
+union all select count (distinct patient_id) as patient_by_day, cast (visit_date as date) as my_date from "PUBLIC".EVENT, "PUBLIC".VISIT 
+where (VISIT.EVENT_ID=EVENT.ID) and (reg_date<>my_date) group by my_date) group by my_date order by my_date
+
+працює - це сумування результатів запиту 1 та запиту 2 для дат, що співпадають на базі набору даних з запиту 3
